@@ -1,0 +1,10 @@
+[package]
+name = "lolc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ariadne = "0.1.5"
+chumsky = "0.8.0"
+clap = { version = "3.2.20", features = ["derive"] }
+pretty = "0.11.3"

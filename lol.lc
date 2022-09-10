@@ -1,0 +1,8 @@
+true = λx y . x
+false = λx y . y
+not = λp . p false true
+and = λp q . p q p
+or = λp q . p p q
+xor = λp q . p (not q) q
+
+main = xor false false
