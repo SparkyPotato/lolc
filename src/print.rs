@@ -40,9 +40,16 @@ fn expr_doc(file: &File, expr: &ExprId, should_minify: bool) -> RcDoc<'static> {
 						RcDoc::text(" "),
 					))
 					.append(RcDoc::text(" . ").append(expr_doc(file, val, true))),
-				Expr::Apply(f, arg) => expr_doc(file, f, true)
+				Expr::Apply(f, arg) => {
+					let doc = expr_doc(file, f, true);
+					if matches!(file.expr(*f), Expr::Fn(..)) {
+						RcDoc::text("(").append(doc).append(RcDoc::text(")"))
+					} else {
+						doc
+					}
 					.append(RcDoc::text(" "))
-					.append(expr_doc(file, arg, true)),
+					.append(expr_doc(file, arg, true))
+				},
 				Expr::Ref(ident) => RcDoc::as_string(&ident.name),
 			}
 		},

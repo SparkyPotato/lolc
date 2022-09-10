@@ -32,10 +32,10 @@ fn main() {
 		handle_errors(&mut cache, errors);
 
 		let file = curry::curry(file);
-		let (file, errors) = resolve::resolve(file);
+		let (mut file, errors) = resolve::resolve(file);
 		handle_errors(&mut cache, errors);
 
-		if let Some(id) = reduce::evaluate(&file) {
+		if let Some(id) = reduce::evaluate(&mut file) {
 			let (file, id) = uncurry_expr(&file, id);
 			let s = print::print_expr(&file, id);
 			println!("{}", s);

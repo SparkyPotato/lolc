@@ -7,17 +7,20 @@ use crate::{curry, parse, parse::Ident};
 #[derive(Debug)]
 pub struct File {
 	pub defs: HashMap<Ident, ExprId>,
-	pub global_bindings: HashMap<BindingIndex, ExprId>,
 	pub inverse_defs: HashMap<ExprId, Ident>,
-	pub exprs: Vec<Expr>,
+	exprs: Vec<Expr>,
+	inverse_exprs: HashMap<Expr, ExprId>,
+	pub global_bindings: HashMap<BindingIndex, ExprId>,
 	pub index_to_name: HashMap<BindingIndex, Ident>,
 }
 
 impl File {
 	pub fn insert_expr(&mut self, expr: Expr) -> ExprId {
-		let id = self.exprs.len();
-		self.exprs.push(expr);
-		ExprId(id as _)
+		*self.inverse_exprs.entry(expr).or_insert_with(|| {
+			let id = ExprId(self.exprs.len() as _);
+			self.exprs.push(expr);
+			id
+		})
 	}
 
 	pub fn insert_def(&mut self, name: Ident, expr: ExprId) {
@@ -33,7 +36,7 @@ pub struct ExprId(u32);
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 pub struct BindingIndex(u32);
 
-#[derive(Clone, Debug)]
+#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
 pub enum Expr {
 	Fn(BindingIndex, ExprId),
 	Apply(ExprId, ExprId),
@@ -43,9 +46,10 @@ pub enum Expr {
 pub fn resolve(mut file: curry::File) -> (File, Vec<Report>) {
 	let mut f = File {
 		defs: HashMap::new(),
-		global_bindings: HashMap::new(),
 		inverse_defs: HashMap::new(),
 		exprs: Vec::new(),
+		inverse_exprs: HashMap::new(),
+		global_bindings: HashMap::new(),
 		index_to_name: HashMap::new(),
 	};
 	let mut diagnostics = Vec::new();
